@@ -1,44 +1,51 @@
 import Pages.LoginPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.*;
+import org.junit.Test;
+import org.junit.BeforeClass;
+import org.junit.AfterClass;
 
 import java.util.concurrent.TimeUnit;
 
 public class TestCase {
-    private WebDriver driver;
-    private String baseUrl = "https://online.mkb.ru/";
-    private LoginPage loginPage;
-
-    @BeforeTest
-    public void launchBrowser() {
+    private static WebDriver driver;
+    private static String baseUrl = "https://online.mkb.ru/";
+    private static LoginPage loginPage;
+    private String password = "123456";
+    private String username = "Avtotest";
+    @BeforeClass
+    public static void launchBrowser() {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         driver.get(baseUrl);
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
     }
 
-    @Test(priority = 1)
+    @Test
     public void login() {
         loginPage = new LoginPage(driver);
 
         loginPage.checkLoad();
-        loginPage.inputUserName("Avtotest");
-        loginPage.inputPassword("123456");
+        loginPage.inputUserName(username);
+        loginPage.inputPassword(password);
         loginPage.submitBtnClick();
+        loginPage.waitForLoaderDisappear();
         loginPage.checkError();
     }
 
-    @Test(priority = 2)
+    @Test
     public void error15Min() {
-        loginPage.loginRepeat("123456");
-        loginPage.loginRepeat("123456");
-        loginPage.loginRepeat("123456");
+        loginPage = new LoginPage(driver);
+        for (int i = 0; i < 3; i++) {
+            loginPage.inputPassword(password);
+            loginPage.submitBtnClick();
+            loginPage.waitForLoaderDisappear();
+        }
         loginPage.checkError15min();
     }
 
-    @AfterTest
-    public void closeBrowser() {
+    @AfterClass
+    public static void closeBrowser() {
         driver.quit();
     }
 }
